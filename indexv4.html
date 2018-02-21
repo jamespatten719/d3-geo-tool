@@ -11,7 +11,14 @@
 	<script src="https://d3js.org/d3.v5.js"></script>
 	<!-- This script makes it easy to use Stamen basemaps   -->
 	<script type="text/javascript" src="http://maps.stamen.com/js/tile.stamen.js?v1.3.0"></script>
-
+	
+	
+  	<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+	<link rel="stylesheet" href="/resources/demos/style.css">
+	<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+	
+	
 	<title>Health Buffer POC</title>
 	<style>
 		body {
@@ -55,6 +62,7 @@
 		#map {
 			height: 100%;
 			
+			
 		}
 		
 		#spinnerbox {
@@ -66,7 +74,8 @@
 		#spinner {
 			height: 20px;
 			width: 40px;
-			font-size: 14px;	
+			font-size: 14px;
+			font-family: sans-serif;
 		}
 		
 		#charts {
@@ -83,7 +92,7 @@
 			left: 30px;
 			
 		}
-		#toggleChart {
+		#reload {
 			position: absolute;
 			height: 20px;
 			width: 52px;
@@ -91,7 +100,6 @@
 			right: 3px;
 			font-size: 10px;
 			color: black;
-			margin: 5px;
 			bottom: 60px;
 		}
 		#poptotal {
@@ -158,6 +166,16 @@
 			text-anchor: end;
 			font-weight: bold;
 		}
+		
+		#slider {
+			position: absolute;
+			bottom: 65px;
+			right: 20px
+			height: 20px;
+			width: 140px;
+			font-size: 14px;
+			font-family: sans-serif;
+		}
 	
 	</style>
 </head>
@@ -181,17 +199,21 @@
 			<svg id="barchart" class="chart"></svg>
 		</div>
 		
-		<div id="toggleChart">
-			Show/Hide Chart
+		<div id="reload">
+			Reload
 		</div>
+		
+		<div id="slider" class ="slider">
+			<div id ="slidevalue" class ="slidevalue"></div>
+		</div>
+		
 		
 		<div id="spinnerbox" class = "spinnerbox">
 			<label for="spinner">Radius (m):</label>
 			<input id="spinner" name="value" value="1000">
-		</div>
-		
-		
+		</div>	
 	</div>
+	
 	<div id="map"></div>
 	
 	<script>
@@ -233,6 +255,13 @@
 				return L.circleMarker(latlng, geojsonMarkerOptions);
 			}
 		}).addTo(map);
+		
+		//pre-load a section of the infected area
+		//function loadarea(e) {
+		//	var preCircle = L.circle(e.latlng, bufferDist * 0.66, {
+		//		color : "#9ACD66"
+		//	}).addTo(map);
+		//}
 
 		//global variable to hold population in buffer
 		var population = [0];
@@ -240,14 +269,14 @@
 		//add variable to hold total
 		var totalDiv = d3.select("#poptotal");
 		totalDiv.append("text");
-
+		
 		//Setup the map click event
 		function onMapClick(e) {
 			//Add a circle to represent the buffer zone
 			//Note: Cirlce size is reduced by 33% to match SQL query results - there is some coordinate
 			//reference stuff going on here - world is not flat.
-			var bufferDist = $('#spinner').val();
-			L.circle(e.latlng, bufferDist * 0.66, {
+			var bufferDist = $('#slider').val();
+			var circle = L.circle(e.latlng, bufferDist * 0.66, {
 				color : "#9ACD66"
 			}).addTo(map);
 
@@ -334,12 +363,20 @@
 				max : 5000,
 				step : 500
 			});
-			//$("#charts").draggable();
-			$("#toggleChart").button();
-			$("#toggleChart").click(function(event) {
-				$("#charts").toggle();
-			});
 		});
+		
+		$( function() {
+			var slider = $( "#slider" ).slider();
+		} );
+		
+		$("#reload").button();
+		$('#reload').click(function() {
+			location.reload();
+		});
+  
+		var slidval = $( "#slider" ).val();
+		document.getElementById("slidevalue").innerHTML= slidval
+  
 		
 		//D3 Chart Stuff
 		function doCharts() {
@@ -369,10 +406,6 @@
 		const numberWithCommas = (x) => {
 			return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 		}	
-		
-		
-		
-				
 		
 	</script>
 </body>
