@@ -468,10 +468,11 @@
 			
 		$("#reload").button()
 		$('#reload').click(function() {
-			//OAcentroidLayer.clearLayers();
+			
+			//set ototal to zero and change %
 			population[0] = 0; 
-			infectedround = 0;
 			document.getElementById("infected").innerHTML= "out of" + " " + "<b>8,000,000</b>" + " " + "infected (0%)" ;
+			//clear all layers and load originals back up again
 			map.eachLayer(function (layer) {
 				map.removeLayer(layer);
 			});
@@ -491,9 +492,13 @@
 			});
 			
 			var bufferLayer = L.geoJson(null).addTo(map);
-
-			d3.select(".chart").remove();
-
+			
+			//remove bars
+			d3.selectAll("rect").remove();
+			d3.selectAll("text").remove();
+			population.splice(1,population.length);
+			
+			//reset total back to zero
 			totalDiv.transition().duration(1000)
 				.tween("text", testtween(0));
 				var format = d3.format(",d")	
