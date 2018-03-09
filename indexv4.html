@@ -18,7 +18,7 @@
 	<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
 	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 		
-	<title>Infected Map</title>
+	<title>Zombie Map</title>
 	<style>
 		body {
 			margin: 0;
@@ -77,17 +77,20 @@
 		}
 		
 		#reload {
+			margin-left: auto;
+			margin-right: auto;
 			position: absolute;
 			height: 17px;
-			width: 42px;
+			width: 46px;
 			z-index: 1;
-			right: 32px;
+			right: 33px;
 			font-size: 14px;
 			font-family: sans-serif;
 			font-weight: bold;
 			color: #4b4b4b;
 			bottom: 60px;
 			text-align: center;
+			tex
 		}
 		
 		#poptotal {
@@ -134,10 +137,7 @@
             content: ""; /* clears default height */
             margin-top: 8px; /* change this to whatever height you want it */
 		}
-		
-		
-		
-		
+			
 		#charthead {
 			position: absolute;
 			font-family: sans-serif;
@@ -190,7 +190,7 @@
 			height: 27px;
 			width: 52px;
 			z-index: 1;
-			right: 201px;
+			right: 203px;
 			font-size: px;
 			color: black;
 			bottom: 60px;
@@ -203,7 +203,7 @@
 			font-size: 14px;
 			color: #9ACD66;
 			font-weight: bold;
-			right: 204px;
+			right: 206px;
 			bottom: 52px;	
 		}
 		
@@ -218,17 +218,18 @@
 		} 
 		
 		#toggle {
+			margin: auto;
+			text-align: center;
 			position: absolute;
 			height: 17px;
-			width: 42px;
+			width: 46px;
 			z-index: 1;
-			right: 115px;
+			right: 118px;
 			font-size: 14px;
 			font-family: sans-serif;
 			font-weight: bold;
 			color: #4b4b4b;
 			bottom: 60px;
-			text-align: center;
 		}
 		
 	</style>
@@ -245,9 +246,9 @@
 		
 		<h1 id = "question" class="question">How many of the infected can you save?</h1>
 			<p id = "context" class = "context">
-				London has been infected by a deadly virus. Only <b>you</b> can save it. Drop the antidotes to save as many people as you can. 
-				<br/> Remember, resources are limited. Only 8 drops can be placed with a max of 3 in central London. All drops must have a max radius of 2000m. 
-				<br/> You must save at least 350,000 people to contain the virus - so choose wisely!
+				London has been infected by a zombie virus. Only <b>you</b> can save it. Drop the antidotes to save as many people as you can. 
+				<br/> Remember, resources are limited. Only 8 drops can be placed with a max of 3 in central London. Drops must have a max radius of 2000m, apart from the final drop.  
+				<br/> You must save at least 600,000 zombies to contain the virus - so choose wisely!
 			</p>
 			
 		<h2 id = "charthead" class = "charthead">Antidote Drops</h2>
@@ -265,11 +266,12 @@
 				<p id = "slidervalue" class = "slidervalue">2000m</p>
 				<p id="radius" class = "radius">Radius: </p>
 				
-		<div id = "toggle" class = "toggle">SQL 1</div>
+		<div id = "toggle" class = "toggle">Density</div>
 			
 	</div>
 	
 	<div id="map"></div>
+	
 	
 	<script>	
 		// necessary for making AJAX calls on Blockbuilder.org as of 2016-11-02
@@ -302,7 +304,7 @@
 				interactivity : 'cartodb_id'
 			}]
 		}).addTo(map);
-
+		
 		// Set up our GeoJSON layers, add them to the map, but don't add data just yet
 		var bufferLayer = L.geoJson(null).addTo(map);
 
@@ -326,8 +328,11 @@
 		var totalDiv = d3.select("#poptotal");
 		totalDiv.append("text");	
 		//Setup the map click event
+					
+		var clicks = 0;			
 			
 		function onMapClick(e) {
+		
 			//Add a circle to represent the buffer zone
 			//Note: Cirlce size is reduced by 33% to match SQL query results - there is some coordinate
 			//reference stuff going on here - world is not flat.
@@ -425,10 +430,28 @@
 				var total = "8,778,431";
 				var totalbold = total.bold();
 			    document.getElementById("infected").innerHTML= "out of" + " " + totalbold + " " + "infected (" + infectedround + "%)" ;	
+				
+				clicks += 1; 			
+					if (population[0] >= 600000 && clicks >= 8) {
+						alert("Congratulations - you have saved the city! Press reload to play again.");
+						}
+					else if (population[0] < 600000 && clicks >= 8) {
+						alert("Unfortunately the zombie virus was not contained. Press reload to try again.");
+						}
+					else {
+						console.log(clicks);
+						console.log(population[0]);
+					};
 					
-			});
-			
+				var slidval1 = $('#slider').slider("option", "value");
+					if (clicks <= 7 && slidval1 > 2000) {
+						alert("Only the final drop can have a radius greater than 2000m. Try again");
+						document.getElementById("reload").click();
+					};		
+			});			
 		};
+		
+		
 		
 		//controls - slider
 		$( function() {
@@ -451,29 +474,40 @@
 				});
 		});
 		
-		//controls - change circle type
-		$("#toggle").button(); //need to add a tooltip onto this
+		
+		//controls 
+		$("#toggle").button(); 
 		$("#toggle").on('click', firstClick)
 		
 		function firstClick() {
 			//alert("First Clicked");
 			$("#toggle").off('click').on('click', secondClick)
-			//set this to be the onClick function as defined above#
 			var $this = $(this);
-			$this.text('SQL 1');			
-		}
+			$this.text('Density');
+			
+			var cluster = cartodb.createLayer(map, {
+					user_name : 'deloitte-uk-admin',
+					type : 'cartodb',
+					sublayers : [{
+						sql : 'select * from lon_oa_residents_geocode_cluster',
+						cartocss : '#layer {marker-width: 7; marker-fill: ramp([cluster_no], (#bef4bf,  #005c02, #89ef8b, #64f567, #00f204, #009c03, #005c02,#000000, #004b01, #003801), quantiles); marker-fill-opacity: 1; marker-allow-overlap: true; marker-line-opacity: 0; }',
+						interactivity : 'cartodb_id'
+					}]
+				}).addTo(map, 0).done(function (layer) {
+					layer0 = layer; 
+				});
 
+			}
+			
 			function secondClick() {
-			//alert("Second Clicked");
-			$("#toggle").off('click').on('click', firstClick)
-			//set this to be the new onClick function
-			var $this = $(this);
-			$this.text('SQL 2');			
-		}
+			$("#toggle").off('click').on('click', firstClick)			
+				layer0.hide();
+			}
 			
 		$("#reload").button()
 		$('#reload').click(function() {
-			
+			//reset the number of clicks on the page
+			clicks = 0; 
 			//set total to zero and change %
 			population[0] = 0; 
 			document.getElementById("infected").innerHTML= "out of" + " " + "<b>8,778,431</b>" + " " + "infected (0%)" ;
