@@ -248,7 +248,7 @@
 			<p id = "context" class = "context">
 				London has been infected by a zombie virus. Only <b>you</b> can save it. Drop the antidotes to save as many people as you can. 
 				<br/> Remember, resources are limited. Only 8 drops can be placed with a max of 3 in central London. Drops must have a max radius of 2000m, apart from the final drop.  
-				<br/> You must save at least 600,000 zombies to contain the virus - so choose wisely!
+				<br/> You must save at least 625,000 zombies to contain the virus - so choose wisely!
 			</p>
 			
 		<h2 id = "charthead" class = "charthead">Antidote Drops</h2>
@@ -432,10 +432,10 @@
 			    document.getElementById("infected").innerHTML= "out of" + " " + totalbold + " " + "infected (" + infectedround + "%)" ;	
 				
 				clicks += 1; 			
-					if (population[0] >= 600000 && clicks >= 8) {
+					if (population[0] >= 625000 && clicks >= 8) {
 						alert("Congratulations - you have saved the city! Press reload to play again.");
 						}
-					else if (population[0] < 600000 && clicks >= 8) {
+					else if (population[0] < 625000 && clicks >= 8) {
 						alert("Unfortunately the zombie virus was not contained. Press reload to try again.");
 						}
 					else {
