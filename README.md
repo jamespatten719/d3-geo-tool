@@ -5,3 +5,5 @@ Remember, resources are limited. Only 8 drops can be placed with a max of 3 in c
 You must save at least 625,000 zombies to contain the virus - so choose wisely!
 
 http://htmlpreview.github.io/?https://github.com/jamespatten719/d3-geo-tool/blob/master/indexv4.html
+
+![alt text](d3-geo-tool/display.png)
